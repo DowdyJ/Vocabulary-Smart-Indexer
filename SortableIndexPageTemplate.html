@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<style>
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+</style>
+<body>
+
+<h2>OH YEah</h2>
+<p>ABOVE BUTTONS</p>
+<input type="checkbox" onclick="toggleAdj()" name="checkboxAdjectives" checked>
+<label for="checkboxAdjectives"> Show adjectives</label><br>
+<input type="checkbox" onclick="toggleNoun()" name="checkboxNouns" checked>
+<label for="checkboxNouns"> Show nouns</label><br>
+<input type="checkbox" onclick="toggleVerb()" name="checkboxVerbs" checked>
+<label for="checkboxVerbs"> Show verbs</label><br>
+<input type="checkbox" onclick="toggleAdverb()" name="checkboxAdverbs" checked>
+<label for="checkboxAdverbs"> Show adverbs</label><br>
+<p>BELOW BUTTONS</p>
+
+<table id="data-table" class="styled-table" style="width:100%">
+
+<!--INSERTION_POINT_TABLE-->
+
+</table>
+<script>
+var speechHeaderTitle="Type of Speech";
+var adjectiveMarker="adjective";
+var nounMarker="noun";
+var verbMarker="verb";
+var adverbMarker="adverb";
+
+var showAdjectives=true;
+var showNouns=true;
+var showVerbs=true;
+var showAdverbs=true;
+
+
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("data-table");
+  switching = true;
+  
+  dir = "asc";
+
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount ++;
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+function refreshTable() {
+
+    let table = document.getElementById("data-table");
+    let partOfSpeechColumnIndex;
+
+    //Get column index to check
+    for (let i = 0; i < table.rows[0].children.length; i++) {
+        if (table.rows[0].children[i].innerHTML === speechHeaderTitle) {
+            partOfSpeechColumnIndex=i;
+            break;
+        }
+    }
+
+    let isAPartOfSpeech = (marker, element) => {
+        return element.innerHTML.includes(marker);
+    };
+
+    for (const row of table.rows) {
+        let element = row.children[partOfSpeechColumnIndex];
+        console.log(element);
+
+        if (element.tagName !== "TD")
+            continue;
+
+        let shouldBeShown = false;
+        if (!shouldBeShown && showAdjectives && isAPartOfSpeech(adjectiveMarker, element)){
+            shouldBeShown = true;
+        } else if (!shouldBeShown && showNouns && isAPartOfSpeech(nounMarker, element)) {
+            shouldBeShown = true;
+        } else if (!shouldBeShown && showAdverbs && isAPartOfSpeech(adverbMarker, element)) { //Adverbs must be checked first as verb is a subset of adverb
+            shouldBeShown = true;
+        } else if (!shouldBeShown && showVerbs && isAPartOfSpeech(verbMarker, element)) {
+            shouldBeShown = true;
+        } 
+        
+        if (shouldBeShown) 
+            element.parentNode.removeAttribute("hidden");
+        else 
+            element.parentNode.setAttribute("hidden", "");
+    } 
+};
+
+function toggleAdj() {
+    showAdjectives = !showAdjectives;
+    refreshTable();
+    return;
+}
+
+function toggleVerb() {
+    showVerbs = !showVerbs;
+    refreshTable();
+    return;
+}
+
+function toggleAdverb() {
+    showAdverbs = !showAdverbs;
+    refreshTable();
+    return;
+}
+function toggleNoun() {
+    showNouns = !showNouns;
+    refreshTable();
+    return;
+}
+
+</script>
+</body>
+</html>
