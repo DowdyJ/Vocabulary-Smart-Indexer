@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html>
 <style>
+body {
+  font-family: sans-serif;
+}
+
+th {
+  height: 30px;
+  font-size: 1.0em;
+  text-align: center;
+}
+
+td {
+  text-align: center;
+}
+
 .styled-table {
     border-collapse: collapse;
     margin: 25px 0;
@@ -10,28 +24,44 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #2a529d;
+}
+
 </style>
 <body>
+  <div style="padding:10px;border:2px solid black;margin-left:auto;margin-right:auto;width:60%">
+    <h2 style="border:2px solid black;text-align: center">Smart Index</h2>
+    <label for="searchField">Search:</label><br>
+    <input type="text" id="searchField" oninput="searchBarCallback()" name="searchField"><br><br>
 
-<h2>OH YEah</h2>
-<p>ABOVE BUTTONS</p>
-<input type="checkbox" onclick="toggleAdj()" name="checkboxAdjectives" checked>
-<label for="checkboxAdjectives"> Show adjectives</label><br>
-<input type="checkbox" onclick="toggleNoun()" name="checkboxNouns" checked>
-<label for="checkboxNouns"> Show nouns</label><br>
-<input type="checkbox" onclick="toggleVerb()" name="checkboxVerbs" checked>
-<label for="checkboxVerbs"> Show verbs</label><br>
-<input type="checkbox" onclick="toggleAdverb()" name="checkboxAdverbs" checked>
-<label for="checkboxAdverbs"> Show adverbs</label><br>
-<p>BELOW BUTTONS</p>
+    <input type="checkbox" onclick="toggleAdj()" name="checkboxAdjectives" checked>
+    <label for="checkboxAdjectives"> Show adjectives</label><br>
+    <input type="checkbox" onclick="toggleNoun()" name="checkboxNouns" checked>
+    <label for="checkboxNouns"> Show nouns</label><br>
+    <input type="checkbox" onclick="toggleVerb()" name="checkboxVerbs" checked>
+    <label for="checkboxVerbs"> Show verbs</label><br>
+    <input type="checkbox" onclick="toggleAdverb()" name="checkboxAdverbs" checked>
+    <label for="checkboxAdverbs"> Show adverbs</label><br>
+  </div>
 
-<table id="data-table" class="styled-table" style="width:100%">
+<table id="data-table" class="styled-table" style="border:1px solid black;margin-left:auto;margin-right:auto;width:60%">
 
 <!--INSERTION_POINT_TABLE-->
 
 </table>
 <script>
 var speechHeaderTitle="Type of Speech";
+var wordColumnTitle="Word"
+
 var adjectiveMarker="adjective";
 var nounMarker="noun";
 var verbMarker="verb";
@@ -41,6 +71,10 @@ var showAdjectives=true;
 var showNouns=true;
 var showVerbs=true;
 var showAdverbs=true;
+
+function searchBarCallback() {
+ refreshTable();
+}
 
 
 function sortTable(n) {
@@ -86,9 +120,10 @@ function sortTable(n) {
 }
 
 function refreshTable() {
-
+    let textFieldValue = document.getElementById("searchField").value;
     let table = document.getElementById("data-table");
     let partOfSpeechColumnIndex;
+    let wordColumnIndex;
 
     //Get column index to check
     for (let i = 0; i < table.rows[0].children.length; i++) {
@@ -98,28 +133,47 @@ function refreshTable() {
         }
     }
 
+    for (let i = 0; i < table.rows[0].children.length; i++) {
+        if (table.rows[0].children[i].innerHTML === wordColumnTitle) {
+            wordColumnIndex=i;
+            break;
+        }
+    }    
+
+    let includesSearchString = (element) => {
+      return element.innerHTML.toLowerCase().includes(textFieldValue.toLowerCase());
+    };
+
     let isAPartOfSpeech = (marker, element) => {
-        return element.innerHTML.includes(marker);
+      return element.innerHTML.includes(marker);
     };
 
     for (const row of table.rows) {
         let element = row.children[partOfSpeechColumnIndex];
-        console.log(element);
 
         if (element.tagName !== "TD")
             continue;
 
         let shouldBeShown = false;
-        if (!shouldBeShown && showAdjectives && isAPartOfSpeech(adjectiveMarker, element)){
+
+        if (!includesSearchString(row.children[wordColumnIndex]))
+          shouldBeShown = false;
+        else {
+          if (!shouldBeShown && showAdjectives && isAPartOfSpeech(adjectiveMarker, element)){
             shouldBeShown = true;
-        } else if (!shouldBeShown && showNouns && isAPartOfSpeech(nounMarker, element)) {
+          } else if (!shouldBeShown && showNouns && isAPartOfSpeech(nounMarker, element)) {
             shouldBeShown = true;
-        } else if (!shouldBeShown && showAdverbs && isAPartOfSpeech(adverbMarker, element)) { //Adverbs must be checked first as verb is a subset of adverb
+          } else if (!shouldBeShown && showAdverbs && isAPartOfSpeech(adverbMarker, element)) { //Adverbs must be checked first as verb is a subset of adverb
             shouldBeShown = true;
-        } else if (!shouldBeShown && showVerbs && isAPartOfSpeech(verbMarker, element)) {
+          } else if (!shouldBeShown && showVerbs && isAPartOfSpeech(verbMarker, element)) {
             shouldBeShown = true;
-        } 
+          } 
+        }
+
         
+
+
+
         if (shouldBeShown) 
             element.parentNode.removeAttribute("hidden");
         else 
