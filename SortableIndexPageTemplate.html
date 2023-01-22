@@ -160,6 +160,7 @@ function refreshTable() {
 
         let shouldBeShown = false;
 
+        let isAdverb = isAPartOfSpeech(adverbMarker, element);
         if (!includesSearchString(row.children[wordColumnIndex]))
           shouldBeShown = false;
         else {
@@ -167,9 +168,9 @@ function refreshTable() {
             shouldBeShown = true;
           } else if (!shouldBeShown && showNouns && isAPartOfSpeech(nounMarker, element)) {
             shouldBeShown = true;
-          } else if (!shouldBeShown && showAdverbs && isAPartOfSpeech(adverbMarker, element)) { //Adverbs must be checked first as verb is a subset of adverb
+          } else if (!shouldBeShown && showAdverbs && isAdverb) { //Adverbs must be checked first as verb is a subset of adverb
             shouldBeShown = true;
-          } else if (!shouldBeShown && showVerbs && isAPartOfSpeech(verbMarker, element)) {
+          } else if (!isAdverb && !shouldBeShown && showVerbs && isAPartOfSpeech(verbMarker, element)) {
             shouldBeShown = true;
           } else if (!shouldBeShown && showOther && isAPartOfSpeech(otherMarker, element)) {
             shouldBeShown = true;
